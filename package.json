@@ -1,0 +1,23 @@
+{
+  "name": "the-super-tiny-jsx-compiler",
+  "version": "1.0.0",
+  "description": "the-super-tiny-jsx-compiler",
+  "main": "super-tiny-jsx-compiler.js",
+  "scripts": {
+    "test": "node test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Lucifier129/the-super-tiny-jsx-compiler.git"
+  },
+  "keywords": [
+    "parser",
+    "compiler"
+  ],
+  "author": "Jade Gu",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Lucifier129/the-super-tiny-jsx-compiler/issues"
+  },
+  "homepage": "https://github.com/Lucifier129/the-super-tiny-jsx-compiler#readme"
+}
