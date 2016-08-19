@@ -2,9 +2,6 @@ var superTinyJSXCompiler = require('./super-tiny-jsx-compiler')
 var assert = require('assert')
 
 var compiler = superTinyJSXCompiler.compiler
-var options = {
-	functionName: 'h'
-}
 
 var input = '<div>test super tiny jsx compiler</div>'
 var output1 = 'h(div, null, "test super tiny jsx compiler");'
