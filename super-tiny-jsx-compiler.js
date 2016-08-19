@@ -173,7 +173,7 @@ function codeGenerator(node, functionName) {
         case 'Program':
             return node.body.map(item => codeGenerator(item, functionName)).join('')
         case 'TagName':
-            return `${functionName}(${node.value}, null, `
+            return `${functionName}("${node.value}", null, `
         case 'TagContent':
             return `"${node.value}");`
         default:
