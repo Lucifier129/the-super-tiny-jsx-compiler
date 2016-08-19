@@ -1,6 +1,6 @@
 /**
-* 小型 jsx 编译器
-*/
+ * super-tiny-jsx-compiler
+ */
 function tokenizer(input) {
     var current = 0
     var tokens = []
@@ -19,14 +19,13 @@ function tokenizer(input) {
     return tokens
 }
 
-var NUMBERS = /[0-9]/
 var ALPHABETS = /[A-z]/
 
 function matchOpenTag(input, current, tokens) {
     var char = input[current]
 
     if (char !== '<') {
-        throw new Error(`开标签必须以<左尖括号开头, 而不是${char}`)
+        throw new Error(`open tag should start with <, not ${char}`)
     }
 
     var value = ''
@@ -35,11 +34,11 @@ function matchOpenTag(input, current, tokens) {
     }
 
     if (value === '') {
-        throw new Error(`缺少标签名`)
+        throw new Error(`expected tag name`)
     }
 
     if (char !== '>') {
-        throw new Error(`缺少闭合符`)
+        throw new Error(`open tag should end with >`)
     }
 
     tokens.push({
@@ -54,13 +53,13 @@ function matchCloseTag(input, current, tokens) {
     var char = input[current]
 
     if (char !== '<') {
-        throw new Error('开标签必须以</左尖括号＋斜杠开头')
+        throw new Error('close tag should start with </')
     }
 
     char = input[++current]
 
     if (char !== '/') {
-        throw new Error('开标签必须以</左尖括号＋斜杠开头')
+        throw new Error('close tag should start with </')
     }
 
     var value = ''
@@ -69,11 +68,11 @@ function matchCloseTag(input, current, tokens) {
     }
 
     if (tokens[0].value !== value) {
-        throw new Error('开标签和闭标签的标签名必须相同')
+        throw new Error(`expected the same tag name, but given ${tokens[0].value} and ${value}`)
     }
 
     if (char !== '>') {
-        throw new Error('闭标签的标签名必须以>结尾')
+        throw new Error('close tag should end with >')
     }
 
     tokens.push({
@@ -101,6 +100,7 @@ function matchTagContent(input, current, tokens) {
 
 function parser(tokens) {
     var current = 0
+
     function walk() {
         var token = tokens[current++]
 
@@ -135,14 +135,10 @@ function parser(tokens) {
         ast.body.push(walk())
     }
 
-    // console.log(tokens, ast)
-
     return ast
 }
 
 function transformer(ast) {
-
-	// console.log(ast)
 
     var newAst = {
         type: 'Program',
@@ -177,7 +173,7 @@ function codeGenerator(node, functionName) {
         case 'Program':
             return node.body.map(item => codeGenerator(item, functionName)).join('')
         case 'TagName':
-            return `${functionName}(${node.value}, `
+            return `${functionName}(${node.value}, null, `
         case 'TagContent':
             return `"${node.value}");`
         default:

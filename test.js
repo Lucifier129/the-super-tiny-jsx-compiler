@@ -7,8 +7,8 @@ var options = {
 }
 
 var input = '<div>test super tiny jsx compiler</div>'
-var output1 = 'h(div, "test super tiny jsx compiler");'
-var output2 = 'React.createElement(div, "test super tiny jsx compiler");'
+var output1 = 'h(div, null, "test super tiny jsx compiler");'
+var output2 = 'React.createElement(div, null, "test super tiny jsx compiler");'
 
 var result1 = compiler(input, {
 	functionName: 'h',
