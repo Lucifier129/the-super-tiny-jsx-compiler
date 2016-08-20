@@ -21,6 +21,8 @@
   },
   "homepage": "https://github.com/Lucifier129/the-super-tiny-jsx-compiler#readme",
   "devDependencies": {
+    "babel-core": "^6.13.2",
+    "babel-plugin-transform-react-jsx": "^6.8.0",
     "expect": "^1.20.2",
     "mocha": "^3.0.2"
   }

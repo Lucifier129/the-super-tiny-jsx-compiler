@@ -200,6 +200,7 @@ function parseTag(input, current) {
                 child += char
                 char = input[++current]
             }
+            child = child.replace(/[\r\n]+/g, ' ')
         }
         return child
     }
@@ -262,7 +263,7 @@ function codeGenerator(node, options) {
             return node.body.map(item => codeGenerator(item, options)).join('')
         case 'Tag':
             var args = [`"${node.name}"`, generateAttributes(node.attributes)].concat(generateChildren(node.children, options) || [])
-            var callExpression = `${options.functionName}(${args.join(', ')})`
+            var callExpression = `${options.functionName}(${args.join(',')})`
             return callExpression
         default:
             throw new Error(node.type)
