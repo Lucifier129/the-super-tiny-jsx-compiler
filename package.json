@@ -1,6 +1,6 @@
 {
   "name": "the-super-tiny-jsx-compiler",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "the-super-tiny-jsx-compiler",
   "main": "super-tiny-jsx-compiler.js",
   "scripts": {

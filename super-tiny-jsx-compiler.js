@@ -10,25 +10,30 @@ function parser(input) {
 
     while (current < input.length) {
         var original = current
-        current = parseTag(input, current, ast.body)
-        if (original === current) {
+        var result = parseTag(input, current)
+
+        if (original === result.current) {
             throw new Error(`Unexpect token ${input.substr(current)}`)
         }
+        current = result.current
+        ast.body.push(result.tag)
     }
 
     return ast
 }
 
 var TAG_NAME = /[A-Za-z0-9]/
-var ATTR_NAME = /\w/
+var ATTR_NAME = /(\w|-|_)/
 var SPACE = /\s/
+var RETURN = /\r/
+var NEXT_LINE = /\n/
 
-function parseTag(input, current, body) {
+function parseTag(input, current) {
     var tag = {
         type: 'Tag',
         name: '',
         attributes: {},
-        content: '',
+        children: [],
     }
 
     function throwError() {
@@ -73,14 +78,15 @@ function parseTag(input, current, body) {
             char = input[++current]
                 // self clost tag
             if (char === '>') {
-                body.push(tag)
-                return current + 1
+                return {
+                    tag: tag,
+                    current: current + 1,
+                }
             } else {
                 throwError()
             }
         } else if (char === '>') {
-            parseTagContent(tag)
-            parseCloseTag(tag)
+            parseChildren(tag)
         } else {
             throwError()
         }
@@ -161,24 +167,59 @@ function parseTag(input, current, body) {
         if (tag.name !== value) {
             throw new Error(`Expected the same tag name, but given ${tag.name} and ${value}`)
         }
-
-        body.push(tag)
     }
 
-    function parseTagContent(tag) {
-        var char = input[++current]
-        while (char !== '<') {
-            if (char === undefined) {
-                throw new Error(`Expected clost tag`)
+    function parseChild() {
+        var char = input[current]
+        var child = ''
+        if (char === '<') {
+            let result = parseTag(input, current)
+            child = result.tag
+            current = result.current
+        } else {
+            while (char !== '<') {
+                if (char === undefined) {
+                    throw new Error(`Expected clost tag`)
+                }
+                if (/(\n|\r)/.test(char)) {
+                    var count = 1
+                    var subChar = input[current + count]
+                    while (SPACE.test(subChar)) {
+                        count += 1
+                        subChar = input[current + count]
+                    }
+                    if (subChar === '<') {
+                        if (input[current + count + 1] === '/') {
+                            current += count
+                            return child.trim()
+                        }
+                        current += count
+                        return parseChild()
+                    }
+                }
+                child += char
+                char = input[++current]
             }
-            tag.content += char
-            char = input[++current]
         }
-        return current
+        return child
+    }
+
+    function parseChildren(tag) {
+        var char = input[++current]
+
+        while (char !== '<' || input[current + 1] !== '/') {
+            tag.children.push(parseChild())
+            char = input[current]
+        }
+
+        parseCloseTag(tag)
     }
 
     parseOpenTag()
-    return current + 1
+    return {
+        tag: tag,
+        current: current + 1,
+    }
 }
 
 function generateAttributes(attributes) {
@@ -195,7 +236,22 @@ function generateAttributes(attributes) {
         }
         return obj
     }, {})
-    return JSON.stringify(attrs, null, 2)
+    return JSON.stringify(attrs)
+}
+
+function generateChildren(children, options) {
+    if (children.length === 0) {
+        return ''
+    }
+    return children.map(function(child) {
+        if (typeof child === 'string') {
+            return child === '' ? '' : `"${child}"`
+        } else if (child.type === 'Tag') {
+            return codeGenerator(child, options)
+        }
+    }).filter(function(child) {
+        return child !== ''
+    })
 }
 
 function codeGenerator(node, options) {
@@ -205,7 +261,9 @@ function codeGenerator(node, options) {
         case 'Program':
             return node.body.map(item => codeGenerator(item, options)).join('')
         case 'Tag':
-            return `${options.functionName}("${node.name}", ${generateAttributes(node.attributes)}, "${node.content}");`
+            var args = [`"${node.name}"`, generateAttributes(node.attributes)].concat(generateChildren(node.children, options) || [])
+            var callExpression = `${options.functionName}(${args.join(', ')})`
+            return callExpression
         default:
             throw new Error(node.type)
     }
@@ -214,7 +272,7 @@ function codeGenerator(node, options) {
 function compiler(input, options) {
     var ast = parser(input)
     var output = codeGenerator(ast, options)
-    return output
+    return `${output};`
 }
 
 module.exports = {
