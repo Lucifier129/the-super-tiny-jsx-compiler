@@ -50,6 +50,29 @@ describe('Compiler should turn `input` into `output`', () => {
             expect(compiler(input2, options)).toBe(output2)
         })
 
+        it('should support self close tag', () => {
+            var input = '<input />'
+            var output = 'h("input", null, "");'
+            expect(compiler(input)).toBe(output)
+        })
+
+        it('should support tag with attributes', () => {
+            var input = `<div foo="1" bar="2">test attributes</div>`
+            var output = `h("div", ${JSON.stringify({ foo: '1', bar: '2' }, null, 2)}, "test attributes");`
+            expect(compiler(input)).toBe(output)
+        })
+
+        it('should support self close tag with attributes', () => {
+            var input = `<input type="text" foo="1" bar="2" />`
+            var attributes = {
+                type: 'text',
+                foo: '1',
+                bar: '2',
+            }
+            var output = `h("input", ${JSON.stringify(attributes, null, 2)}, "");`
+            expect(compiler(input)).toBe(output)
+        })
+
     })
 
 })
