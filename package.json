@@ -1,10 +1,10 @@
 {
   "name": "the-super-tiny-jsx-compiler",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "the-super-tiny-jsx-compiler",
   "main": "super-tiny-jsx-compiler.js",
   "scripts": {
-    "test": "node test.js"
+    "test": "mocha"
   },
   "repository": {
     "type": "git",
@@ -19,5 +19,9 @@
   "bugs": {
     "url": "https://github.com/Lucifier129/the-super-tiny-jsx-compiler/issues"
   },
-  "homepage": "https://github.com/Lucifier129/the-super-tiny-jsx-compiler#readme"
+  "homepage": "https://github.com/Lucifier129/the-super-tiny-jsx-compiler#readme",
+  "devDependencies": {
+    "expect": "^1.20.2",
+    "mocha": "^3.0.2"
+  }
 }

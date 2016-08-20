@@ -1,21 +1,55 @@
-var superTinyJSXCompiler = require('./super-tiny-jsx-compiler')
-var assert = require('assert')
+/**
+ * test
+ */
+var expect = require('expect')
 
+var superTinyJSXCompiler = require('./super-tiny-jsx-compiler')
 var compiler = superTinyJSXCompiler.compiler
 
-var input = '<div>test super tiny jsx compiler</div>'
-var output1 = 'h(div, null, "test super tiny jsx compiler");'
-var output2 = 'React.createElement(div, null, "test super tiny jsx compiler");'
+describe('Compiler should turn `input` into `output`', () => {
 
-var result1 = compiler(input, {
-	functionName: 'h',
+    describe('works with single tag', () => {
+        it('should support custom functionName', () => {
+            var input = '<div>test super tiny jsx compiler</div>'
+            var output = 'foo("div", null, "test super tiny jsx compiler");'
+            var options = {
+                functionName: 'foo',
+            }
+            expect(compiler(input, options)).toBe(output)
+        })
+
+        it('should support empty content', () => {
+            var input = '<div></div>'
+            var output = 'foo("div", null, "");'
+            var options = {
+                functionName: 'foo',
+            }
+            expect(compiler(input, options)).toBe(output)
+        })
+
+        it('should throw error with invalid tag name', () => {
+            try {
+                var output = compiler("<a^[]a></a^[]a>", {
+                    functionName: "foo"
+                })
+            } catch (error) {
+            	expect(error).toExist()
+            }
+        })
+
+        it('should support number to be a valid tag name', () => {
+        	var input1 = '<1>test number tag name</1>'
+        	var output1 = 'foo("1", null, "test number tag name");'
+        	var input2 = '<a1></a1>'
+        	var output2 = 'foo("a1", null, "");'
+        	var options = {
+        		functionName: 'foo',
+        	}
+            
+            expect(compiler(input1, options)).toBe(output1)
+            expect(compiler(input2, options)).toBe(output2)
+        })
+
+    })
+
 })
-
-var result2 = compiler(input, {
-	functionName: 'React.createElement',
-})
-
-assert.deepStrictEqual(result1, output1, 'Compiler should turn `input` into `output`')
-assert.deepStrictEqual(result2, output2, 'Compiler should turn `input` into `output`')
-
-console.log('All Passed!')

@@ -12,33 +12,35 @@ function tokenizer(input) {
         current = matchTagContent(input, current, tokens)
         current = matchCloseTag(input, current, tokens)
         if (original === current) {
-            throw new Error(`unexpect token ${input.substr(current)}`)
+            throw new Error(`Unexpect token ${input.substr(current)}`)
         }
     }
 
     return tokens
 }
 
-var ALPHABETS = /[A-z]/
+var TAG_NAME = /[A-Za-z0-9]/
 
 function matchOpenTag(input, current, tokens) {
     var char = input[current]
 
     if (char !== '<') {
-        throw new Error(`open tag should start with <, not ${char}`)
+        throw new Error(`Open tag should start with <, not ${char}`)
     }
 
     var value = ''
-    while (ALPHABETS.test(char = input[++current])) {
-        value += char
+    while (char = input[++current]) {
+        if (TAG_NAME.test(char)) {
+            value += char
+        } else if (char === '>') {
+            break
+        } else {
+            throw new Error(`Invalid tag name ${value + char}...`)
+        }
     }
 
     if (value === '') {
-        throw new Error(`expected tag name`)
-    }
-
-    if (char !== '>') {
-        throw new Error(`open tag should end with >`)
+        throw new Error(`Expected tag name`)
     }
 
     tokens.push({
@@ -53,7 +55,7 @@ function matchCloseTag(input, current, tokens) {
     var char = input[current]
 
     if (char !== '<') {
-        throw new Error('close tag should start with </')
+        throw new Error('Close tag should start with </')
     }
 
     char = input[++current]
@@ -63,16 +65,22 @@ function matchCloseTag(input, current, tokens) {
     }
 
     var value = ''
-    while (ALPHABETS.test(char = input[++current])) {
-        value += char
+    while (char = input[++current]) {
+        if (TAG_NAME.test(char)) {
+            value += char
+        } else if (char === '>') {
+            break
+        } else {
+            throw new Error(`Invalid tag name ${value + char}...`)
+        }
     }
 
     if (tokens[0].value !== value) {
-        throw new Error(`expected the same tag name, but given ${tokens[0].value} and ${value}`)
+        throw new Error(`Expected the same tag name, but given ${tokens[0].value} and ${value}`)
     }
 
     if (char !== '>') {
-        throw new Error('close tag should end with >')
+        throw new Error('Close tag should end with >')
     }
 
     tokens.push({
@@ -173,7 +181,7 @@ function codeGenerator(node, functionName) {
         case 'Program':
             return node.body.map(item => codeGenerator(item, functionName)).join('')
         case 'TagName':
-            return `${functionName}(${node.value}, null, `
+            return `${functionName}("${node.value}", null, `
         case 'TagContent':
             return `"${node.value}");`
         default:
