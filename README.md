@@ -1,5 +1,5 @@
 # the-super-tiny-jsx-compiler
-the-super-tiny-jsx-compiler
+the-super-tiny-jsx-compiler, working in process, should not use in production.
 
 ## inspiration
 
